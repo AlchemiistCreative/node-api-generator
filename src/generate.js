@@ -1,31 +1,39 @@
-const fs = require('fs');
-const path = require('path');
-const inquirer = require('inquirer');
-const ejs = require('ejs');
-const { execSync } = require('child_process');
+#!/usr/bin/node
 
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import inquirer from 'inquirer';
+import ejs from 'ejs';
+import { execSync } from 'child_process';
+
+// Define __dirname for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Path to templates directory
 const TEMPLATES_DIR = path.join(__dirname, 'templates');
 
 function initializeGit(projectDir) {
-  try {
-      console.log('Initializing Git repository...');
-      const gitOutput = execSync('git init', { cwd: projectDir, stdio: 'pipe' }).toString();
-      console.log('Git Initialization Output:\n', gitOutput.trim());
-      console.log('Git repository successfully initialized.');
-  } catch (error) {
-      console.error('Error initializing Git repository:', error.message);
-  }
+    try {
+        console.log('Initializing Git repository...');
+        const gitOutput = execSync('git init', { cwd: projectDir, stdio: 'pipe' }).toString();
+        console.log('Git Initialization Output:\n', gitOutput.trim());
+        console.log('Git repository successfully initialized.');
+    } catch (error) {
+        console.error('Error initializing Git repository:', error.message);
+    }
 }
 
 function initializeNpm(projectDir) {
-  try {
-      console.log('Initializing NPM and installing dependencies...');
-      const npmOutput = execSync('npm init -y && npm install', { cwd: projectDir, stdio: 'pipe' }).toString();
-      console.log('NPM Initialization Output:\n', npmOutput.trim());
-      console.log('NPM repository and dependencies successfully installed.');
-  } catch (error) {
-      console.error('Error initializing NPM:', error.message);
-  }
+    try {
+        console.log('Initializing NPM and installing dependencies...');
+        const npmOutput = execSync('npm init -y && npm install', { cwd: projectDir, stdio: 'pipe' }).toString();
+        console.log('NPM Initialization Output:\n', npmOutput.trim());
+        console.log('NPM repository and dependencies successfully installed.');
+    } catch (error) {
+        console.error('Error initializing NPM:', error.message);
+    }
 }
 
 async function main() {
@@ -57,56 +65,54 @@ async function main() {
     if (answers.initGit) initializeGit(projectDir);
     if (answers.initNpm) initializeNpm(projectDir);
 
-  
     console.log(`Project ${answers.projectName} generated successfully!`);
 }
 
 function copyAndRenderTemplates(projectDir, answers) {
-  const filesToRender = [
-      'package.json.template',
-      `db/db.${answers.dbType}.js.template`,
-      `models/model.${answers.dbType}.js.template`,
-      'server.js.template',
-      `controllers/controller.${answers.dbType}.js.template`,
-      'routes/route.js.template',
-      'docker-compose.yml.template',
-      'README.md.template'
-  ];
+    const filesToRender = [
+        'package.json.template',
+        `db/db.${answers.dbType}.js.template`,
+        `models/model.${answers.dbType}.js.template`,
+        'server.js.template',
+        `controllers/controller.${answers.dbType}.js.template`,
+        'routes/route.js.template',
+        'docker-compose.yml.template',
+        'README.md.template',
+    ];
 
-  filesToRender.forEach((file) => {
-      const templatePath = path.join(TEMPLATES_DIR, file);
-      let outputFilePath = path.join(projectDir, file.replace('.template', ''));
+    filesToRender.forEach((file) => {
+        const templatePath = path.join(TEMPLATES_DIR, file);
+        let outputFilePath = path.join(projectDir, file.replace('.template', ''));
 
-      if (file === `models/model.${answers.dbType}.js.template`) {
-          outputFilePath = path.join(projectDir, `models/${answers.modelName.toLowerCase()}.model.js`);
-      }
-      if (file === `controllers/controller.${answers.dbType}.js.template`) {
-          outputFilePath = path.join(projectDir, `controllers/${answers.modelName.toLowerCase()}.controller.js`);
-      }
-      if (file === 'routes/route.js.template') {
-          outputFilePath = path.join(projectDir, `routes/${answers.modelName.toLowerCase()}.route.js`);
-      }
+        if (file === `models/model.${answers.dbType}.js.template`) {
+            outputFilePath = path.join(projectDir, `models/${answers.modelName.toLowerCase()}.model.js`);
+        }
+        if (file === `controllers/controller.${answers.dbType}.js.template`) {
+            outputFilePath = path.join(projectDir, `controllers/${answers.modelName.toLowerCase()}.controller.js`);
+        }
+        if (file === 'routes/route.js.template') {
+            outputFilePath = path.join(projectDir, `routes/${answers.modelName.toLowerCase()}.route.js`);
+        }
 
-      const renderedContent = ejs.render(fs.readFileSync(templatePath, 'utf8'), answers);
+        const renderedContent = ejs.render(fs.readFileSync(templatePath, 'utf8'), answers);
 
-      const outputDir = path.dirname(outputFilePath);
-      if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
+        const outputDir = path.dirname(outputFilePath);
+        if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
-      fs.writeFileSync(outputFilePath, renderedContent);
-  });
+        fs.writeFileSync(outputFilePath, renderedContent);
+    });
 
-  // Copy static files
-  ['Dockerfile'].forEach((file) => {
-      fs.copyFileSync(path.join(TEMPLATES_DIR, file), path.join(projectDir, file));
-  });
+    // Copy static files
+    ['Dockerfile'].forEach((file) => {
+        fs.copyFileSync(path.join(TEMPLATES_DIR, file), path.join(projectDir, file));
+    });
 }
-
 
 function generateDotenvFile(projectDir, answers) {
     const dotenvContent = answers.dbType === 'mongo' ?
-        `APP_PORT=${answers.dbPort}
+        `APP_PORT=${answers.appPort}
 MONGO_URI=mongodb://${answers.dbHost}:${answers.dbPort}/${answers.dbName}` :
-        `APP_PORT=${answers.dbPort}
+        `APP_PORT=${answers.appPort}
 DB_HOST=${answers.dbHost}
 DB_PORT=${answers.dbPort}
 DB_NAME=${answers.dbName}
