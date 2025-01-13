@@ -1,0 +1,9 @@
+# src/templates/docker-compose.yml
+version: '3'
+services:
+  app:
+    build: .
+    ports:
+      - "<%= appPort %>:<%= appPort %>"
+    volumes:
+      - .:/app

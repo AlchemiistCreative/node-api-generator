@@ -1,0 +1,9 @@
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db/db.sql');
+
+const <%= modelName %> = sequelize.define('<%= modelName %>', {
+  name: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.STRING, allowNull: false },
+}, { timestamps: true });
+
+module.exports = <%= modelName %>;

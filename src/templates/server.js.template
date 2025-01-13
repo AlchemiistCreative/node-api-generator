@@ -1,0 +1,51 @@
+const express = require('express');
+const app = express();
+const dotenv = require('dotenv');
+
+// Load environment variables from .env file if present
+dotenv.config();
+
+app.use(express.json());
+
+<% if (useSwagger) { %>
+// Swagger setup
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API Documentation',
+            version: '1.0.0',
+            description: 'Generated API documentation',
+        },
+        servers: [
+            {
+                url: `http://localhost:${process.env.PORT || 5000}`,
+            },
+        ],
+    },
+    apis: ['./routes/*.js'], // Path to your route files for Swagger annotations
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+<% } %>
+
+// Placeholder route
+app.get('/', (req, res) => {
+    res.json({ message: 'Welcome to the API!' });
+});
+
+// Additional routes can be defined here
+// Example: app.use('/api/items', require('./routes/items'));
+app.use('/api/<%= modelName.toLowerCase() %>', require('./routes/<%= modelName.toLowerCase() %>.route.js'));
+
+const PORT = process.env.APP_PORT || 5000;
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+    <% if (useSwagger) { %>
+    console.log(`Swagger docs available at http://localhost:${PORT}/api-docs`);
+    <% } %>
+});

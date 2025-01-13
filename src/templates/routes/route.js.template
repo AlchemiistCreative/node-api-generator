@@ -1,0 +1,137 @@
+const express = require('express');
+const router = express.Router();
+const {
+    getAll<%= modelName %>s,
+    get<%= modelName %>ById,
+    create<%= modelName %>,
+    update<%= modelName %>,
+    delete<%= modelName %>
+} = require('../controllers/<%= modelName.toLowerCase() %>.controller.js');
+
+/**
+ * @swagger
+ * tags:
+ *   name: <%= modelName %>s
+ *   description: API endpoints for managing <%= modelName.toLowerCase() %>s
+ */
+
+/**
+ * @swagger
+ * /api/<%= modelName.toLowerCase() %>:
+ *   get:
+ *     summary: Get all <%= modelName.toLowerCase() %>s
+ *     tags: [<%= modelName %>s]
+ *     responses:
+ *       200:
+ *         description: A list of <%= modelName.toLowerCase() %>s
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.get('/', getAll<%= modelName %>s);
+
+/**
+ * @swagger
+ * /api/<%= modelName.toLowerCase() %>/{id}:
+ *   get:
+ *     summary: Get a <%= modelName.toLowerCase() %> by ID
+ *     tags: [<%= modelName %>s]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the <%= modelName.toLowerCase() %> to retrieve
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: A single <%= modelName.toLowerCase() %>
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *       404:
+ *         description: <%= modelName %> not found
+ */
+router.get('/:id', get<%= modelName %>ById);
+
+/**
+ * @swagger
+ * /api/<%= modelName.toLowerCase() %>:
+ *   post:
+ *     summary: Create a new <%= modelName.toLowerCase() %>
+ *     tags: [<%= modelName %>s]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: <%= modelName %> created successfully
+ */
+router.post('/', create<%= modelName %>);
+
+/**
+ * @swagger
+ * /api/<%= modelName.toLowerCase() %>/{id}:
+ *   put:
+ *     summary: Update a <%= modelName.toLowerCase() %>
+ *     tags: [<%= modelName %>s]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the <%= modelName.toLowerCase() %> to update
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: <%= modelName %> updated successfully
+ *       404:
+ *         description: <%= modelName %> not found
+ */
+router.put('/:id', update<%= modelName %>);
+
+/**
+ * @swagger
+ * /api/<%= modelName.toLowerCase() %>/{id}:
+ *   delete:
+ *     summary: Delete a <%= modelName.toLowerCase() %>
+ *     tags: [<%= modelName %>s]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         description: ID of the <%= modelName.toLowerCase() %> to delete
+ *         schema:
+ *           type: string
+ *     responses:
+ *       204:
+ *         description: <%= modelName %> deleted successfully
+ *       404:
+ *         description: <%= modelName %> not found
+ */
+router.delete('/:id', delete<%= modelName %>);
+
+module.exports = router;

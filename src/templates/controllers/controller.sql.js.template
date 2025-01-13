@@ -1,0 +1,54 @@
+const <%= modelName %> = require('../models/<%= modelName.toLowerCase() %>.model.js');
+
+exports.getAll<%= modelName %>s = async (req, res) => {
+    try {
+        const items = await <%= modelName %>.findAll();
+        res.json(items);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.get<%= modelName %>ById = async (req, res) => {
+    try {
+        const item = await <%= modelName %>.findByPk(req.params.id);
+        if (!item) return res.status(404).json({ error: 'Not found' });
+        res.json(item);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.create<%= modelName %> = async (req, res) => {
+    try {
+        const newItem = await <%= modelName %>.create(req.body);
+        res.status(201).json(newItem);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.update<%= modelName %> = async (req, res) => {
+    try {
+        const updatedItem = await <%= modelName %>.update(req.body, {
+            where: { id: req.params.id },
+            returning: true,
+        });
+        if (updatedItem[0] === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(updatedItem[1][0]);
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
+
+exports.delete<%= modelName %> = async (req, res) => {
+    try {
+        const deletedCount = await <%= modelName %>.destroy({
+            where: { id: req.params.id },
+        });
+        if (deletedCount === 0) return res.status(404).json({ error: 'Not found' });
+        res.status(204).send();
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+};
